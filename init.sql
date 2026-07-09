@@ -1,0 +1,2 @@
+CREATE DATABASE prefect_db;
+CREATE DATABASE mlflow_db;
