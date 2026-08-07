@@ -33,6 +33,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:5000/health')\""]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
 
   prefect-server:
     build: .
@@ -45,10 +51,19 @@ services:
       - PREFECT_SERVER_API_HOST=0.0.0.0
       - PREFECT_SERVER_API_PORT=4200
       - PREFECT_SERVER_ANALYTICS_ENABLED=false
+      - PREFECT_SQLALCHEMY_POOL_TIMEOUT=60
+      - PREFECT_SQLALCHEMY_MAX_OVERFLOW=10
     command: prefect server start
+    restart: on-failure
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:4200/api/health')\""]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 30s
 
   prefect-worker:
     build: .
@@ -60,10 +75,14 @@ services:
     volumes:
       - .:/app
     command: python run_worker.py
+    restart: on-failure
     depends_on:
-      - prefect-server
-      - mlflow
-      - db
+      prefect-server:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
+      db:
+        condition: service_healthy
 
   fastapi-app:
     build: .
@@ -77,9 +96,12 @@ services:
     volumes:
       - .:/app
     command: uvicorn app.api:app --host 0.0.0.0 --port 8000
+    restart: on-failure
     depends_on:
-      - db
-      - mlflow
+      db:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
 
 volumes:
   pgdata:

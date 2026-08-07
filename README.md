@@ -142,8 +142,10 @@ Cada `@task` tem política de retry proporcional ao seu custo computacional:
 
 ---
 
-## 🎬 Vídeo de Demonstração
+## 🎬 Entregas do Projeto (Links)
 
-> 🔗 Link do vídeo: *(a ser preenchido antes da entrega final)*
+- 📄 **Apresentação (Slides):** [Acessar Apresentação](https://docs.google.com/presentation/d/1-menZKcnYu4VxOW-tlOlvaGk7qJQAzRdvdlrCZgbTaA/edit?usp=sharing)
+- 🎙️ **Pitch (Vídeo):** [Assistir Pitch](https://drive.google.com/file/d/1kjKy-cklEQGyF0DK3X8z7QqS6P8Y3PfJ/view?usp=sharing)
+- ⚙️ **Execução do Projeto (Vídeo):** [Assistir Execução](https://drive.google.com/file/d/15xRlgW0NW06vTmIl2WkitfzdM7V2v5J7/view?usp=sharing)
 
-O vídeo cobre: contexto do problema, arquitetura da solução, demonstração do pipeline rodando end-to-end e principais decisões técnicas.
+Os vídeos cobrem o contexto do problema, a arquitetura da solução, a demonstração do pipeline rodando end-to-end e as principais decisões técnicas.
