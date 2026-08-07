@@ -99,7 +99,7 @@ def ingest_data_to_bronze(num_records: int = 1000):
     logger.info("Ingestão concluída com sucesso na tabela bronze_customers!")
     return len(df)
 
-@task
+@task(retries=2, retry_delay_seconds=10)
 def clean_and_transform_bronze_to_silver():
     """
     Consome da camada Bronze, realiza limpeza, tipagem, feature engineering
@@ -128,7 +128,7 @@ def clean_and_transform_bronze_to_silver():
     logger.info("Dados limpos e gravados com sucesso na tabela silver_customers!")
     return len(df)
 
-@task
+@task(retries=2, retry_delay_seconds=30)
 def train_and_track_models():
     """
     Treina modelos de Machine Learning (Random Forest e XGBoost)
@@ -201,7 +201,7 @@ def train_and_track_models():
         mlflow.xgboost.log_model(xgb, "model", registered_model_name="churn_xgb_model")
         logger.info(f"XGB Treinado. F1-Score: {f1:.4f}")
 
-@task
+@task(retries=2, retry_delay_seconds=15)
 def register_and_promote_best_model():
     """
     Busca o melhor modelo treinado com base na métrica F1-Score no MLflow

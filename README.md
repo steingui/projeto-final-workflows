@@ -96,3 +96,54 @@ curl -X POST -H "Content-Type: application/json" \
    - Compara as métricas do histórico.
    - Seleciona o modelo com o maior **F1-Score**.
    - Atualiza a tag no MLflow Model Registry para `Production` e grava os metadados do campeão na tabela `active_model` no Postgres para consumo imediato da API.
+
+---
+
+## 🎯 Contexto e Problema
+
+Churn (cancelamento de clientes) é uma das métricas mais críticas em negócios de assinatura. O custo de adquirir um novo cliente é 5–7x maior que o de retê-lo. Este pipeline resolve o problema de **identificar proativamente clientes com alto risco de cancelamento**, permitindo que equipes de CRM atuem antes do cancelamento acontecer.
+
+O desafio central não é apenas treinar um modelo, mas garantir que o ciclo completo — da ingestão ao serving — seja **reprodutível, idempotente e observável**, funcionando de forma autônoma em produção sem intervenção manual.
+
+---
+
+## 🧠 Decisões Técnicas
+
+### Por que Prefect e não Airflow?
+
+O Prefect 3.x foi escolhido por três razões concretas:
+
+1. **Deploy sem infraestrutura extra**: O `flow.serve()` sobe um worker polling com uma única linha de Python, sem precisar de um scheduler DAG separado. O Airflow exigiria configurar Celery/Redis ou Kubernetes Executor para distribuição equivalente.
+2. **Código-primeiro**: Os flows são funções Python puras decoradas com `@flow`/`@task`, sem XML, YAML ou DSL proprietário. Isso reduz o tempo de onboarding e facilita testes unitários.
+3. **Orquestração event-driven nativa**: O endpoint `/trigger` da FastAPI aciona o flow via Prefect Client (`run_deployment`) sem precisar de sensores ou ExternalTaskSensor do Airflow.
+
+### Por que MLflow para rastreamento e não W&B ou outro?
+
+- **Self-hosted**: O MLflow roda completamente on-premise via Docker, sem dependência de serviços externos ou custos variáveis.
+- **Model Registry integrado**: Suporta staging (`None → Production → Archived`) nativamente, eliminando a necessidade de controle manual de versões.
+- **Backend SQL**: O `backend-store-uri` apontando para PostgreSQL centraliza metadados de experimentos no mesmo banco do pipeline, simplificando backups e consistência transacional.
+
+### Estratégia de Idempotência
+
+- **Camada Bronze**: `INSERT ... ON CONFLICT (customer_id) DO UPDATE` garante upsert por chave natural — re-executar o pipeline nunca duplica registros.
+- **Camada Silver**: `DROP TABLE IF EXISTS` + `to_sql` recria a tabela derivada a partir do Bronze, que é a fonte de verdade. Operação determinística e segura para re-execução.
+
+### Por que PostgreSQL como backend unificado?
+
+Um único PostgreSQL serve como: (1) store de dados do pipeline (Bronze/Silver/active_model), (2) backend do Prefect Server, e (3) backend do MLflow. Isso reduz a superfície de infraestrutura, facilita backups atômicos e elimina problemas de sincronização entre datastores heterogêneos.
+
+### Resiliência por camada
+
+Cada `@task` tem política de retry proporcional ao seu custo computacional:
+- **Ingestão** (`retries=3, delay=5s`): falhas de rede/DB são transitórias e rápidas de resolver.
+- **Transformação** (`retries=2, delay=10s`): operações de leitura/escrita no Postgres, delay maior para evitar lock contention.
+- **Treinamento** (`retries=2, delay=30s`): operação cara; delay longo para o MLflow Server se estabilizar após restart.
+- **Promoção** (`retries=2, delay=15s`): chamadas à API do MLflow Client.
+
+---
+
+## 🎬 Vídeo de Demonstração
+
+> 🔗 Link do vídeo: *(a ser preenchido antes da entrega final)*
+
+O vídeo cobre: contexto do problema, arquitetura da solução, demonstração do pipeline rodando end-to-end e principais decisões técnicas.
