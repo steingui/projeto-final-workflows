@@ -1,4 +1,4 @@
-prefect>=3.0.3
+prefect>=3.6.28.dev2
 mlflow>=3.17.0
 psycopg2-binary>=2.9.0
 pandas>=2.0.0
