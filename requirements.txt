@@ -1,5 +1,5 @@
 prefect>=3.6.28.dev2
-mlflow>=3.17.0
+mlflow>=3.17.2
 psycopg2-binary>=2.9.0
 pandas>=2.0.0
 scikit-learn>=1.5.0
