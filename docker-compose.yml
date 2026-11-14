@@ -18,7 +18,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    read_only: true
+    security_opt:
+      - no-new-privileges:true
 
   mlflow:
     build: .
@@ -40,7 +41,8 @@ services:
       timeout: 10s
       retries: 10
       start_period: 20s
-    read_only: true
+    security_opt:
+      - no-new-privileges:true
 
   prefect-server:
     build: .
@@ -66,7 +68,8 @@ services:
       timeout: 10s
       retries: 15
       start_period: 30s
-    read_only: true
+    security_opt:
+      - no-new-privileges:true
 
   prefect-worker:
     build: .
@@ -86,7 +89,8 @@ services:
         condition: service_healthy
       db:
         condition: service_healthy
-    read_only: true
+    security_opt:
+      - no-new-privileges:true
 
   fastapi-app:
     build: .
@@ -106,7 +110,8 @@ services:
         condition: service_healthy
       mlflow:
         condition: service_healthy
-    read_only: true
+    security_opt:
+      - no-new-privileges:true
 
 volumes:
   pgdata:
