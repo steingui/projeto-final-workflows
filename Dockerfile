@@ -15,4 +15,6 @@ COPY . .
 
 EXPOSE 8000 5000 4200
 
+# Run as an unprivileged user (added by Panoptes)
+USER 10001:10001
 CMD ["python"]
