@@ -15,6 +15,9 @@ COPY . .
 
 EXPOSE 8000 5000 4200
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD python -c "import socket; socket.create_connection(('127.0.0.1', 8000), timeout=4).close()" || exit 1
+
 # Run as an unprivileged user (added by Panoptes)
 USER 10001:10001
 CMD ["python"]
