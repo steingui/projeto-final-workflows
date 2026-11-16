@@ -20,6 +20,7 @@ services:
       retries: 5
     security_opt:
       - no-new-privileges:true
+    read_only: true
 
   mlflow:
     build: .
@@ -43,6 +44,7 @@ services:
       start_period: 20s
     security_opt:
       - no-new-privileges:true
+    read_only: true
 
   prefect-server:
     build: .
@@ -70,6 +72,7 @@ services:
       start_period: 30s
     security_opt:
       - no-new-privileges:true
+    read_only: true
 
   prefect-worker:
     build: .
@@ -91,6 +94,7 @@ services:
         condition: service_healthy
     security_opt:
       - no-new-privileges:true
+    read_only: true
 
   fastapi-app:
     build: .
@@ -112,6 +116,7 @@ services:
         condition: service_healthy
     security_opt:
       - no-new-privileges:true
+    read_only: true
 
 volumes:
   pgdata:
